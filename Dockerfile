@@ -62,7 +62,8 @@ RUN \
  curl -O https://codeload.github.com/ronggang/transmission-web-control/zip/master && \
  unzip -q master && \
  rm master && \
- mv transmission-web-control-master/ transmission-web-control/ && \
+ mv /transmission-web-control-master/src/ /transmission-web-control/ && \
+ rm -rf /transmission-web-control-master/ && \
  echo "**** finish ****"
 
 # ports and volumes
