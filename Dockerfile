@@ -44,11 +44,11 @@ RUN \
  echo "**** compile finish ****" && \
  
  echo "**** copy artifact ****" && \
- cp ./daemon/transmission-daemon /usr/bin/ && \
- cp ./daemon/transmission-remote /usr/bin/ && \
- cp ./utils/transmission-create /usr/bin/ && \
- cp ./utils/transmission-edit /usr/bin/ && \
- cp ./utils/transmission-show /usr/bin/ && \
+ cp -f ./daemon/transmission-daemon /usr/bin/transmission-daemon && \
+ cp -f ./daemon/transmission-remote /usr/bin/transmission-remote && \
+ cp -f ./utils/transmission-create /usr/bin/transmission-create && \
+ cp -f ./utils/transmission-edit /usr/bin/transmission-edit && \
+ cp -f ./utils/transmission-show /usr/bin/transmission-show && \
  
  echo "**** cleanup ****" && \
  apk del build-base && \
