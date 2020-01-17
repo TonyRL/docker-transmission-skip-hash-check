@@ -63,7 +63,7 @@ RUN \
  unzip -q master && \
  rm master && \
  mv transmission-web-control-master/ transmission-web-control/ && \
- echo "**** finish ****" \
+ echo "**** finish ****"
 
 # ports and volumes
 EXPOSE 9091 51413 51413/udp
