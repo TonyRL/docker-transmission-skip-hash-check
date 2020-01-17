@@ -43,7 +43,7 @@ RUN \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
  
- echo "**** copy artifact ****" && \
+ echo "**** overwrite base executable ****" && \
  cp -f ./daemon/transmission-daemon /usr/bin/transmission-daemon && \
  cp -f ./daemon/transmission-remote /usr/bin/transmission-remote && \
  cp -f ./utils/transmission-create /usr/bin/transmission-create && \
