@@ -1,0 +1,1 @@
+# docker-transmission-skip-hash
