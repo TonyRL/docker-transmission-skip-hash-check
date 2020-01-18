@@ -1,4 +1,4 @@
-FROM linuxserver/transmission:latest
+FROM lsiobase/alpine:3.11
 
 # set version label
 ARG BUILD_DATE
