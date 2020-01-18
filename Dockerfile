@@ -17,7 +17,6 @@ RUN \
 	curl \
 	curl-dev \
 	intltool \
-	gettext-dev \
 	libevent-dev \
 	libtool \
 	m4 \
@@ -40,10 +39,8 @@ RUN \
 	-o patches/003-fdlimit.patch && \
  
  echo "**** apply patch ****" && \
- patch < ./patches/002-fdlimit.patch && \
  cd libtransmission && \
  patch < ../patches/001-skip-hash-checking.patch && \
- patch < ../patches/003-fdlimit.patch && \
  cd .. && \
  
  echo "**** setup artifact folder ****" && \
@@ -52,8 +49,6 @@ RUN \
  
  echo "**** compile checks ****" && \
  ../autogen.sh && \
- ../configure --enable-daemon --with-gtk=no && \
- 
  echo "**** compile start ****" && \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
