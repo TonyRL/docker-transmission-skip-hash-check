@@ -48,7 +48,7 @@ RUN \
  cd build && \
  
  echo "**** compile checks ****" && \
- ../autogen.sh && \
+ ../configure --enable-daemon --with-gtk=no && \
  echo "**** compile start ****" && \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
