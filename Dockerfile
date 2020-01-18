@@ -67,8 +67,12 @@ RUN \
  
  echo "**** cleanup ****" && \
  apk del --no-cache \
+	autoconf \
+	automake \
 	build-base \
-	cmake && \
+	cmake \
+	libtool \
+	m4 && \
  rm -rf /transmission-build && \
  rm -rf /combustion-release && \
  rm -rf /kettu && \
