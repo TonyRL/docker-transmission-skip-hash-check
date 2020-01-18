@@ -10,12 +10,17 @@ LABEL maintainer="TonyRL"
 RUN \
  echo "**** install packages ****" && \
  apk add --no-cache \
+	autoconf \
+	automake \
 	build-base \
 	cmake \
 	curl \
 	curl-dev \
 	intltool \
+	gettext-dev \
 	libevent-dev \
+	libtool \
+	m4 \
 	miniupnpc-dev && \
  mkdir /transmission-build && \
  cd /transmission-build && \
@@ -35,17 +40,18 @@ RUN \
 	-o patches/003-fdlimit.patch && \
  
  echo "**** apply patch ****" && \
+ patch < ./patches/002-fdlimit.patch && \
  cd libtransmission && \
- patch < ../patch/001-skip-hash-checking.patch && \
- patch < ../patch/003-fdlimit.patch && \
+ patch < ../patches/001-skip-hash-checking.patch && \
+ patch < ../patches/003-fdlimit.patch && \
  cd .. && \
- patch < ../patch/002-fdlimit.patch && \
  
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \
  
  echo "**** compile checks ****" && \
+ ../autogen.sh && \
  ../configure --enable-daemon --with-gtk=no && \
  
  echo "**** compile start ****" && \
@@ -75,7 +81,11 @@ RUN \
  rm master && \
  mv /transmission-web-control-master/src/ /transmission-web-control/ && \
  rm -rf /transmission-web-control-master/ && \
+ cd / && \
  echo "**** finish ****"
+
+# copy local files
+COPY root/ /
 
 # ports and volumes
 EXPOSE 9091 51413 51413/udp
