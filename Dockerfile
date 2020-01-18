@@ -11,6 +11,7 @@ RUN \
  echo "**** install packages ****" && \
  apk add --no-cache \
 	build-base \
+	cmake \
 	curl \
 	curl-dev \
 	intltool \
@@ -24,13 +25,21 @@ RUN \
  tar Jxf transmission-2.94.tar.xz && \
  cd transmission-2.94 && \
  
- echo "**** download skip hash check patch ****" && \
- curl -O https://raw.githubusercontent.com/TonyRL/spksrc-origin/master/cross/transmission/patches/002-skip-hash-checking.patch && \
+ echo "**** download patch ****" && \
+ mkdir patches && \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/001-skip-hash-checking.patch \
+	-o patches/001-skip-hash-checking.patch && \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/002-fdlimit.patch \
+	-o patches/002-fdlimit.patch && \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/003-fdlimit.patch \
+	-o patches/003-fdlimit.patch && \
  
  echo "**** apply patch ****" && \
  cd libtransmission && \
- patch < ../002-skip-hash-checking.patch && \
+ patch < ../patch/001-skip-hash-checking.patch && \
+ patch < ../patch/003-fdlimit.patch && \
  cd .. && \
+ patch < ../patch/002-fdlimit.patch && \
  
  echo "**** setup artifact folder ****" && \
  mkdir build && \
@@ -51,7 +60,9 @@ RUN \
  cp -f ./utils/transmission-show /usr/bin/transmission-show && \
  
  echo "**** cleanup ****" && \
- apk del build-base && \
+ apk del --no-cache \
+	build-base \
+	cmake && \
  rm -rf /transmission-build && \
  rm -rf /combustion-release && \
  rm -rf /kettu && \

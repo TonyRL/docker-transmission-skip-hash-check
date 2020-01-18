@@ -1,0 +1,36 @@
+From 907f368360ae8514e7d4652b999a00a3cf9c6741 Mon Sep 17 00:00:00 2001
+From: Vitaly Potyarkin <sio.wtf@gmail.com>
+Date: Fri, 14 Jun 2019 14:49:26 +0300
+Subject: [PATCH] Lift 1024 open files limit (switch to curl polling API)
+
+Backported from https://github.com/transmission/transmission/pull/893
+---
+ CMakeLists.txt            |  2 +-
+ configure.ac              |  2 +-
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index da28e31..c2e4ec2 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -94,7 +94,7 @@ string(SUBSTRING "${TR_VCS_REVISION}" 0 10 TR_VCS_REVISION)
+ 
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ 
+-set(CURL_MINIMUM            7.15.4)
++set(CURL_MINIMUM            7.28.0)
+ set(EVENT2_MINIMUM          2.0.10)
+ set(OPENSSL_MINIMUM         0.9.7)
+ set(CYASSL_MINIMUM          3.0)
+diff --git a/configure.ac b/configure.ac
+index df8cb50..277db00 100644
+--- configure.ac
++++ configure.ac
+@@ -39,7 +39,7 @@ AM_CONDITIONAL(HAVE_REVISION_FILE, test -f REVISION)
+ ##
+ ##
+ 
+-CURL_MINIMUM=7.15.4
++CURL_MINIMUM=7.28.0
+ AC_SUBST(CURL_MINIMUM)
+ LIBEVENT_MINIMUM=2.0.10
+ AC_SUBST(LIBEVENT_MINIMUM)
