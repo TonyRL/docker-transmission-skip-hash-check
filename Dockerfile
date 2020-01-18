@@ -54,11 +54,12 @@ RUN \
  echo "**** compile finish ****" && \
  
  echo "**** overwrite base executable ****" && \
- cp -f ./daemon/transmission-daemon /usr/bin/transmission-daemon && \
- cp -f ./daemon/transmission-remote /usr/bin/transmission-remote && \
- cp -f ./utils/transmission-create /usr/bin/transmission-create && \
- cp -f ./utils/transmission-edit /usr/bin/transmission-edit && \
- cp -f ./utils/transmission-show /usr/bin/transmission-show && \
+ make install
+ cp -f /usr/local/bin/transmission-daemon /usr/bin/transmission-daemon && \
+ cp -f /usr/local/bin/transmission-remote /usr/bin/transmission-remote && \
+ cp -f /usr/local/bin/transmission-create /usr/bin/transmission-create && \
+ cp -f /usr/local/bins/transmission-edit /usr/bin/transmission-edit && \
+ cp -f /usr/local/bins/transmission-show /usr/bin/transmission-show && \
  
  echo "**** cleanup ****" && \
  apk del --no-cache \
