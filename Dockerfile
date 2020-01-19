@@ -54,7 +54,7 @@ RUN \
  echo "**** compile finish ****" && \
  
  echo "**** overwrite base executable ****" && \
- make install
+ make install && \
  cp -f /usr/local/bin/transmission-daemon /usr/bin/transmission-daemon && \
  cp -f /usr/local/bin/transmission-remote /usr/bin/transmission-remote && \
  cp -f /usr/local/bin/transmission-create /usr/bin/transmission-create && \
