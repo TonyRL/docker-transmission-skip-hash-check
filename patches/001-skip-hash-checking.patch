@@ -1,6 +1,14 @@
 --- libtransmission/rpcimpl.c	2018-05-02 01:21:08.228549615 +0800
 +++ libtransmission/rpcimpl.c	2018-05-02 01:21:08.228549615 +0800
-@@ -386,6 +386,8 @@
+@@ -30,6 +30,7 @@
+ #include "torrent.h"
+ #include "utils.h"
+ #include "variant.h"
++#include "verify.h"
+ #include "version.h"
+ #include "web.h"
+ 
+@@ -386,6 +387,8 @@
  
    assert (idle_data == NULL);
  
