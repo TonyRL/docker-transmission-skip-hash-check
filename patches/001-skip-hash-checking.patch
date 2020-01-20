@@ -35,7 +35,7 @@
  };
  
 +static bool skipHashCheck = false;
-+void tr_skipHash ()
++void tr_skipHash (void)
 +{
 +  skipHashCheck = true;
 +  tr_logAddInfo("skipHashCheck set to true");
