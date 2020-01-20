@@ -34,7 +34,7 @@
    MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
  };
  
-+static bool skipHashChecking = false;
++static bool skipHashCheck = false;
 +void tr_skipHash ()
 +{
 +  skipHashCheck = true;
