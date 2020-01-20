@@ -15,7 +15,7 @@
   * @{
   */
  
-+void tr_skipHash ();
++void tr_skipHash (void);
 +
  void tr_verifyAdd (tr_torrent           * tor,
                     tr_verify_done_func    callback_func,
