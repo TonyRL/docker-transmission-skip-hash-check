@@ -58,8 +58,6 @@ RUN \
  cp -f /usr/local/bin/transmission-daemon /usr/bin/transmission-daemon && \
  cp -f /usr/local/bin/transmission-remote /usr/bin/transmission-remote && \
  cp -f /usr/local/bin/transmission-create /usr/bin/transmission-create && \
- cp -f /usr/local/bins/transmission-edit /usr/bin/transmission-edit && \
- cp -f /usr/local/bins/transmission-show /usr/bin/transmission-show && \
  
  echo "**** cleanup ****" && \
  apk del --no-cache \
