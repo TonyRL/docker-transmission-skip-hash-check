@@ -8,7 +8,7 @@ LABEL maintainer="TonyRL"
 
 # install packages
 RUN \
- echo "**** install packages ****" && \
+ echo "**** install packages *****" && \
  apk add --no-cache \
 	autoconf \
 	automake \
