@@ -44,18 +44,16 @@
  static bool
  verifyTorrent (tr_torrent * tor, bool * stopFlag)
  {
-@@ -73,8 +80,9 @@
+@@ -73,7 +80,7 @@
          hadPiece = tr_torrentPieceIsComplete (tor, pieceIndex);
  
        /* if we're starting a new file... */
 -      if (filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
 +      if (!skipHashCheck && filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
          {
-+          tr_logAddInfo("starting a new file");
            char * filename = tr_torrentFindFile (tor, fileIndex);
            fd = filename == NULL ? TR_BAD_SYS_FILE : tr_sys_file_open (filename,
-                TR_SYS_FILE_READ | TR_SYS_FILE_SEQUENTIAL, 0, NULL);
-@@ -92,8 +100,9 @@
+@@ -92,8 +99,9 @@
        if (fd != TR_BAD_SYS_FILE)
          {
            uint64_t numRead;
@@ -66,17 +64,16 @@
                bytesThisPass = numRead;
                tr_sha1_update (sha, buffer, bytesThisPass);
  #if defined HAVE_POSIX_FADVISE && defined POSIX_FADV_DONTNEED
-@@ -116,7 +125,8 @@
+@@ -116,7 +124,7 @@
            uint8_t hash[SHA_DIGEST_LENGTH];
  
            tr_sha1_final (sha, hash);
 -          hasPiece = !memcmp (hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH);
 +          hasPiece = skipHashCheck || !memcmp (hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH);
-+          tr_logAddInfo("hasPiece");
  
            if (hasPiece || hadPiece)
              {
-@@ -154,6 +164,11 @@
+@@ -154,6 +162,11 @@
          }
      }
  
