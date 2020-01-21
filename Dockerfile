@@ -1,4 +1,4 @@
-FROM lsiobase/alpine:3.11
+FROM ubuntu:latest as builder
 
 # set version label
 ARG BUILD_DATE
@@ -6,21 +6,24 @@ ARG VERSION
 LABEL build_version="transmission-skip-hash version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="TonyRL"
 
+COPY root/ /s6-config
 # install packages
 RUN \
  echo "**** install packages ****" && \
- apk add --no-cache \
-	autoconf \
-	automake \
-	build-base \
-	cmake \
+ apt update && \
+ apt install -qqy \
+	apt-utils \
+	build-essential \
 	curl \
-	curl-dev \
-	intltool \
+	intltool  \
+	libcurl4-openssl-dev \
 	libevent-dev \
+	libminiupnpc-dev \
+	libssl-dev \
 	libtool \
-	m4 \
-	miniupnpc-dev && \
+	pkg-config \
+	unzip \
+	zlib1g-dev && \
  mkdir /transmission-build && \
  cd /transmission-build && \
  
@@ -35,44 +38,26 @@ RUN \
 	-o patches/001-skip-hash-checking.patch && \
  curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/002-fdlimit.patch \
 	-o patches/002-fdlimit.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/003-fdlimit.patch \
-	-o patches/003-fdlimit.patch && \
  
  echo "**** apply patch ****" && \
- cd libtransmission && \
- patch < ../patches/001-skip-hash-checking.patch && \
- cd .. && \
+ patch -N -p0 < patches/001-skip-hash-checking.patch && \
+ patch -N -p0 < patches/002-fdlimit.patch && \
  
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \
  
  echo "**** compile checks ****" && \
- ../configure --enable-daemon --with-gtk=no && \
+ ../autogen.sh --enable-daemon --disable-nls && \
  echo "**** compile start ****" && \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
+ make install && \
  
  echo "**** overwrite base executable ****" && \
- make install && \
- cp -f /usr/local/bin/transmission-daemon /usr/bin/transmission-daemon && \
- cp -f /usr/local/bin/transmission-remote /usr/bin/transmission-remote && \
- cp -f /usr/local/bin/transmission-create /usr/bin/transmission-create && \
- 
- echo "**** cleanup ****" && \
- apk del --no-cache \
-	autoconf \
-	automake \
-	build-base \
-	cmake \
-	libtool \
-	m4 && \
- rm -rf /transmission-build && \
- rm -rf /combustion-release && \
- rm -rf /kettu && \
- rm -rf /transmission-web-control && \
- 
- echo "**** setup latest transmission-web-control ****" && \
+  
+ echo "**** setup default web interface  + transmission-web-control ****" && \
+ cp -rp /usr/local/share/transmission/web /web && \
  cd / && \
  curl -O https://codeload.github.com/ronggang/transmission-web-control/zip/master && \
  unzip -q master && \
@@ -80,10 +65,30 @@ RUN \
  mv /transmission-web-control-master/src/ /transmission-web-control/ && \
  rm -rf /transmission-web-control-master/ && \
  cd / && \
+
+ echo "**** cleanup ****" && \
+ apt clean && \
+ rm -rf /transmission-build && \
  echo "**** finish ****"
 
+FROM lsiobase/ubuntu:bionic
+
+RUN \
+ echo "**** install packages ****" && \
+ apt update && \
+ apt install -qqy \
+	libcurl3-gnutls \
+	libevent-2.1-6 \
+	libminiupnpc10 \
+	libnatpmp1 && \
+ echo "**** cleanup ****" && \
+ apt clean
+
 # copy local files
-COPY root/ /
+COPY --from=builder /usr/local/bin/ /usr/bin/
+COPY --from=builder /web  /web
+COPY --from=builder /transmission-web-control  /transmission-web-control
+COPY --from=builder /s6-config /
 
 # ports and volumes
 EXPOSE 9091 51413 51413/udp

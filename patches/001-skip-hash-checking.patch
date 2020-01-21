@@ -8,15 +8,15 @@
  #include "version.h"
  #include "web.h"
  
-@@ -386,6 +387,8 @@
+@@ -385,6 +386,8 @@
+   tr_torrent ** torrents;
  
    assert (idle_data == NULL);
++  
++  tr_skipHash ();
  
-+  tr_skipHash();
-+  tr_logAddInfo("Invoke skip hash");
    torrents = getTorrents (session, args_in, &torrentCount);
    for (i=0; i<torrentCount; ++i)
-     {
 --- libtransmission/verify.h	2018-05-02 01:21:08.232549633 +0800
 +++ libtransmission/verify.h	2018-05-02 01:21:08.232549633 +0800
 @@ -19,6 +19,8 @@
@@ -30,7 +30,7 @@
                     void                 * callback_user_data);
 --- libtransmission/verify.c	2018-05-02 01:21:08.232549633 +0800
 +++ libtransmission/verify.c	2018-05-02 01:21:08.232549633 +0800
-@@ -39,6 +39,13 @@
+@@ -39,6 +39,12 @@
    MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
  };
  
@@ -38,13 +38,12 @@
 +void tr_skipHash (void)
 +{
 +  skipHashCheck = true;
-+  tr_logAddInfo("skipHashCheck set to true");
 +}
 +
  static bool
  verifyTorrent (tr_torrent * tor, bool * stopFlag)
  {
-@@ -73,7 +80,7 @@
+@@ -73,7 +79,7 @@
          hadPiece = tr_torrentPieceIsComplete (tor, pieceIndex);
  
        /* if we're starting a new file... */
@@ -53,18 +52,16 @@
          {
            char * filename = tr_torrentFindFile (tor, fileIndex);
            fd = filename == NULL ? TR_BAD_SYS_FILE : tr_sys_file_open (filename,
-@@ -92,8 +99,9 @@
+@@ -92,7 +98,7 @@
        if (fd != TR_BAD_SYS_FILE)
          {
            uint64_t numRead;
 -          if (tr_sys_file_read_at (fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
 +          if (!skipHashCheck && tr_sys_file_read_at (fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
              {
-+              tr_logAddInfo("read a bit");
                bytesThisPass = numRead;
                tr_sha1_update (sha, buffer, bytesThisPass);
- #if defined HAVE_POSIX_FADVISE && defined POSIX_FADV_DONTNEED
-@@ -116,7 +124,7 @@
+@@ -116,7 +122,7 @@
            uint8_t hash[SHA_DIGEST_LENGTH];
  
            tr_sha1_final (sha, hash);
@@ -73,15 +70,16 @@
  
            if (hasPiece || hadPiece)
              {
-@@ -154,6 +162,11 @@
+@@ -153,6 +159,12 @@
+           filePos = 0;
          }
      }
- 
++	
 +  if (skipHashCheck)
 +    {
 +      skipHashCheck = false;
-+      tr_logAddTorInfo (tor, "%s", _("skipped hash check"));
++      tr_logAddTorInfo (tor, "%s", _("Skipped hash check"));
 +    }
+ 
    /* cleanup */
    if (fd != TR_BAD_SYS_FILE)
-     tr_sys_file_close (fd, NULL);
