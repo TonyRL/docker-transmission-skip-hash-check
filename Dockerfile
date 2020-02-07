@@ -77,7 +77,7 @@ RUN \
  echo "**** install packages ****" && \
  apt update && \
  apt install -qqy \
-	libcurl3-gnutls \
+	libcurl4 \
 	libevent-2.1-6 \
 	libminiupnpc10 \
 	libnatpmp1 && \
