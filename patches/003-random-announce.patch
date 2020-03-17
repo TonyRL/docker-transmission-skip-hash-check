@@ -1,0 +1,42 @@
+From 86b0f3470e930bbda2b10b8188821a38cc72968c Mon Sep 17 00:00:00 2001
+From: lps-rocks <admin@lps.rocks>
+Date: Wed, 26 Jun 2019 21:17:08 -0400
+Subject: [PATCH 1/2] Skew Scrape/Announce intervals +/- up to 5%
+Subject: [PATCH 2/2] Remove unnecessary line
+
+This will help prevent slamming trackers that may not be returning a randomized announce/scrape interval.
+---
+ libtransmission/announcer.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/libtransmission/announcer.c b/libtransmission/announcer.c
+index 193d716a1..96ca4534c 100644
+--- libtransmission/announcer.c
++++ libtransmission/announcer.c
+@@ -1147,10 +1147,11 @@
+                then a separate scrape isn't needed */
+             if (scrape_fields >= 3 || (scrape_fields >= 1 && tracker->scrape != NULL))
+             {
++				i = round(tier->scrapeIntervalSec * 0.95) +
++					tr_rand_int_weak(round(tier->scrapeIntervalSec * 0.1));
+                 tr_logAddTorDbg (tier->tor, "Announce response contained scrape info; "
+-                                      "rescheduling next scrape to %d seconds from now.",
+-                                      tier->scrapeIntervalSec);
+-                tier->scrapeAt = get_next_scrape_time (announcer->session, tier, tier->scrapeIntervalSec);
++                                      "rescheduling next scrape to %d seconds from now.", i);
++                tier->scrapeAt = get_next_scrape_time (announcer->session, tier, i);
+                 tier->lastScrapeTime = now;
+                 tier->lastScrapeSucceeded = true;
+             }
+@@ -1176,8 +1177,9 @@
+             if (!isStopped && !tier->announce_event_count)
+             {
+                 /* the queue is empty, so enqueue a perodic update */
+-                i = tier->announceIntervalSec;
+-                dbgmsg (tier, "Sending periodic reannounce in %d seconds", i);
++                i = round(tier->announceIntervalSec * 0.95) + 
++					tr_rand_int_weak(round(tier->announceIntervalSec * 0.1));
++                tr_logAddTorDbg(tier->tor, "Sending periodic reannounce in %d seconds", i);
+                 tier_announce_event_push (tier, TR_ANNOUNCE_EVENT_NONE, now + i);
+             }
+         }
