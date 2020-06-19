@@ -1,85 +1,85 @@
---- libtransmission/rpcimpl.c	2018-05-02 01:21:08.228549615 +0800
-+++ libtransmission/rpcimpl.c	2018-05-02 01:21:08.228549615 +0800
-@@ -30,6 +30,7 @@
- #include "torrent.h"
+--- libtransmission/rpcimpl.c	2020-05-22 19:04:23.391804861 +0800
++++ libtransmission/rpcimpl.c	2020-05-22 19:04:23.391804861 +0800
+@@ -32,6 +32,7 @@
+ #include "tr-macros.h"
  #include "utils.h"
  #include "variant.h"
 +#include "verify.h"
  #include "version.h"
  #include "web.h"
  
-@@ -385,6 +386,8 @@
-   tr_torrent ** torrents;
+@@ -363,6 +364,8 @@
+     struct tr_rpc_idle_data* idle_data UNUSED)
+ {
+     TR_ASSERT(idle_data == NULL);
++	
++	tr_skipHash ();
  
-   assert (idle_data == NULL);
-+  
-+  tr_skipHash ();
- 
-   torrents = getTorrents (session, args_in, &torrentCount);
-   for (i=0; i<torrentCount; ++i)
---- libtransmission/verify.h	2018-05-02 01:21:08.232549633 +0800
-+++ libtransmission/verify.h	2018-05-02 01:21:08.232549633 +0800
-@@ -19,6 +19,8 @@
+     int torrentCount;
+     tr_torrent** torrents = getTorrents(session, args_in, &torrentCount);
+--- libtransmission/verify.h	2020-05-22 19:04:23.394804884 +0800
++++ libtransmission/verify.h	2020-05-22 19:04:23.394804884 +0800
+@@ -17,6 +17,8 @@
   * @{
   */
  
-+void tr_skipHash (void);
++void tr_skipHash(void);
 +
- void tr_verifyAdd (tr_torrent           * tor,
-                    tr_verify_done_func    callback_func,
-                    void                 * callback_user_data);
---- libtransmission/verify.c	2018-05-02 01:21:08.232549633 +0800
-+++ libtransmission/verify.c	2018-05-02 01:21:08.232549633 +0800
-@@ -39,6 +39,12 @@
-   MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
+ void tr_verifyAdd(tr_torrent* tor, tr_verify_done_func callback_func, void* callback_user_data);
+ 
+ void tr_verifyRemove(tr_torrent* tor);
+--- libtransmission/verify.c	2020-05-22 19:04:23.394804884 +0800
++++ libtransmission/verify.c	2020-05-22 19:04:23.394804884 +0800
+@@ -30,6 +30,12 @@
+     MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
  };
  
 +static bool skipHashCheck = false;
-+void tr_skipHash (void)
++void tr_skipHash(void)
 +{
-+  skipHashCheck = true;
++    skipHashCheck = true;
 +}
 +
- static bool
- verifyTorrent (tr_torrent * tor, bool * stopFlag)
+ static bool verifyTorrent(tr_torrent* tor, bool* stopFlag)
  {
-@@ -73,7 +79,7 @@
-         hadPiece = tr_torrentPieceIsComplete (tor, pieceIndex);
+     time_t end;
+@@ -66,7 +72,7 @@
+         }
  
-       /* if we're starting a new file... */
--      if (filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
-+      if (!skipHashCheck && filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
+         /* if we're starting a new file... */
+-        if (filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
++        if (!skipHashCheck && filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
          {
-           char * filename = tr_torrentFindFile (tor, fileIndex);
-           fd = filename == NULL ? TR_BAD_SYS_FILE : tr_sys_file_open (filename,
-@@ -92,7 +98,7 @@
-       if (fd != TR_BAD_SYS_FILE)
+             char* filename = tr_torrentFindFile(tor, fileIndex);
+             fd = filename == NULL ? TR_BAD_SYS_FILE : tr_sys_file_open(filename, TR_SYS_FILE_READ | TR_SYS_FILE_SEQUENTIAL, 0,
+@@ -86,7 +92,7 @@
          {
-           uint64_t numRead;
--          if (tr_sys_file_read_at (fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
-+          if (!skipHashCheck && tr_sys_file_read_at (fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
-             {
-               bytesThisPass = numRead;
-               tr_sha1_update (sha, buffer, bytesThisPass);
-@@ -116,7 +122,7 @@
-           uint8_t hash[SHA_DIGEST_LENGTH];
+             uint64_t numRead;
  
-           tr_sha1_final (sha, hash);
--          hasPiece = !memcmp (hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH);
-+          hasPiece = skipHashCheck || !memcmp (hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH);
- 
-           if (hasPiece || hadPiece)
+-            if (tr_sys_file_read_at(fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
++            if (!skipHashCheck && tr_sys_file_read_at(fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
              {
-@@ -153,6 +159,12 @@
-           filePos = 0;
+                 bytesThisPass = numRead;
+                 tr_sha1_update(sha, buffer, bytesThisPass);
+@@ -108,7 +114,7 @@
+             uint8_t hash[SHA_DIGEST_LENGTH];
+ 
+             tr_sha1_final(sha, hash);
+-            hasPiece = memcmp(hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH) == 0;
++            hasPiece = skipHashCheck || memcmp(hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH) == 0;
+ 
+             if (hasPiece || hadPiece)
+             {
+@@ -146,6 +152,12 @@
+             filePos = 0;
          }
      }
 +	
-+  if (skipHashCheck)
-+    {
-+      skipHashCheck = false;
-+      tr_logAddTorInfo (tor, "%s", _("Skipped hash check"));
-+    }
++	if (skipHashCheck)
++	{
++		skipHashCheck = false;
++		tr_logAddTorInfo (tor, "%s", _("Skipped hash check"));
++	}
  
-   /* cleanup */
-   if (fd != TR_BAD_SYS_FILE)
+     /* cleanup */
+     if (fd != TR_BAD_SYS_FILE)
