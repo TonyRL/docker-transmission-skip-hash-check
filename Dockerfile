@@ -34,11 +34,11 @@ RUN \
  
  echo "**** download patch ****" && \
  mkdir patches && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/001-skip-hash-checking.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/001-skip-hash-checking.patch \
 	-o patches/001-skip-hash-checking.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/002-fdlimit.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/002-fdlimit.patch \
 	-o patches/002-fdlimit.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/master/patches/003-random-announce.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/003-random-announce.patch \
 	-o patches/003-random-announce.patch && \
  
  echo "**** apply patch ****" && \
