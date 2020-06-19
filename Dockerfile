@@ -28,9 +28,9 @@ RUN \
  cd /transmission-build && \
  
  echo "**** download transmission ****" && \
- curl -O https://raw.githubusercontent.com/transmission/transmission-releases/master/transmission-2.94.tar.xz && \
- tar Jxf transmission-2.94.tar.xz && \
- cd transmission-2.94 && \
+ curl -O https://raw.githubusercontent.com/transmission/transmission-releases/master/transmission-3.00.tar.xz && \
+ tar Jxf transmission-3.00.tar.xz && \
+ cd transmission-3.00 && \
  
  echo "**** download patch ****" && \
  mkdir patches && \
