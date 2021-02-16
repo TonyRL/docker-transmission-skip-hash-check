@@ -3,6 +3,7 @@ FROM ubuntu:bionic as builder
 # set version label
 ARG BUILD_DATE
 ARG VERSION
+ARG DEBIAN_FRONTEND=noninteractive
 LABEL build_version="transmission-skip-hash version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="TonyRL"
 
