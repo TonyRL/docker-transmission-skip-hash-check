@@ -1,4 +1,4 @@
-FROM ubuntu:bionic as builder
+FROM ubuntu:focal as builder
 
 # set version label
 ARG BUILD_DATE
@@ -34,11 +34,11 @@ RUN \
  
  echo "**** download patch ****" && \
  mkdir patches && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/001-skip-hash-checking.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/001-skip-hash-checking.patch \
 	-o patches/001-skip-hash-checking.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/002-fdlimit.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/002-fdlimit.patch \
 	-o patches/002-fdlimit.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/bionic-v3/patches/003-random-announce.patch \
+ curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/003-random-announce.patch \
 	-o patches/003-random-announce.patch && \
  
  echo "**** apply patch ****" && \
@@ -74,15 +74,15 @@ RUN \
  rm -rf /transmission-build && \
  echo "**** finish ****"
 
-FROM lsiobase/ubuntu:bionic
+FROM lsiobase/ubuntu:focal
 
 RUN \
  echo "**** install packages ****" && \
  apt update && \
  apt install -qqy \
 	libcurl4 \
-	libevent-2.1-6 \
-	libminiupnpc10 \
+	libevent-2.1-7 \
+	libminiupnpc17 \
 	libnatpmp1 && \
  echo "**** cleanup ****" && \
  apt clean
