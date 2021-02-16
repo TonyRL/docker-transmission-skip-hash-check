@@ -8,23 +8,32 @@ mkdir -p \
 [[ ! -f /config/settings.json ]] && cp \
 	/defaults/settings.json /config/settings.json
 
-# copy blocklist-update script
-[[ ! -f /config/blocklist-update.sh ]] && cp \
-	/defaults/blocklist-update.sh /config/blocklist-update.sh
-
 if [ ! -z "$USER" ] && [ ! -z "$PASS" ]; then
 	sed -i '/rpc-authentication-required/c\    "rpc-authentication-required": true,' /config/settings.json
 	sed -i "/rpc-username/c\    \"rpc-username\": \"$USER\"," /config/settings.json
 	sed -i "/rpc-password/c\    \"rpc-password\": \"$PASS\"," /config/settings.json
+else
+	sed -i '/rpc-authentication-required/c\    "rpc-authentication-required": false,' /config/settings.json
+	sed -i "/rpc-username/c\    \"rpc-username\": \"$USER\"," /config/settings.json
+	sed -i "/rpc-password/c\    \"rpc-password\": \"$PASS\"," /config/settings.json
+fi
+
+if [ ! -z "$WHITELIST" ]; then
+	sed -i '/rpc-host-whitelist-enabled/c\    "rpc-host-whitelist-enabled": true,' /config/settings.json
+	sed -i "/\"rpc-host-whitelist\"/c\    \"rpc-host-whitelist\": \"$WHITELIST\"," /config/settings.json
+	sed -i '/rpc-whitelist-enabled/c\    "rpc-host-whitelist-enabled": true,' /config/settings.json
+	sed -i "/\"rpc-whitelist\"/c\    \"rpc-host-whitelist\": \"$WHITELIST\"," /config/settings.json
+else
+	sed -i '/rpc-host-whitelist-enabled/c\    "rpc-host-whitelist-enabled": false,' /config/settings.json
+	sed -i "/\"rpc-host-whitelist\"/c\    \"rpc-host-whitelist\": \"$WHITELIST\"," /config/settings.json
+	sed -i '/rpc-whitelist-enabled/c\    "rpc-whitelist-enabled": false,' /config/settings.json
+	sed -i "/\"rpc-whitelist\"/c\    \"rpc-whitelist\": \"$WHITELIST\"," /config/settings.json
 fi
 
 # permissions
 chown abc:abc \
 	/config/settings.json \
-	/config/blocklist-update.sh \
 	/downloads \
 	/downloads/complete \
 	/downloads/incomplete \
 	/watch
-
-chmod 755 /config/blocklist-update.sh
