@@ -57,9 +57,7 @@ RUN \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
  make install && \
- 
- echo "**** overwrite base executable ****" && \
-  
+   
  echo "**** setup default web interface  + transmission-web-control ****" && \
  cp -rp /usr/local/share/transmission/web /web && \
  cd / && \
@@ -93,6 +91,15 @@ COPY --from=builder /usr/local/bin/ /usr/bin/
 COPY --from=builder /web  /web
 COPY --from=builder /transmission-web-control  /transmission-web-control
 COPY --from=builder /s6-config /
+
+RUN \
+ echo "**** setup web interface ****" && \
+ mkdir /usr/local/share/transmission && \
+ ln -s /web/ /usr/local/share/transmission/web && \
+ ln -s /web/index.html /transmission-web-control/index.original.html && \
+ ln -s /web/images/ /transmission-web-control/images && \
+ ln -s /web/javascript/ /transmission-web-control/javascript && \
+ ln -s /web/style/ /transmission-web-control/style
 
 # ports and volumes
 EXPOSE 9091 51413 51413/udp
