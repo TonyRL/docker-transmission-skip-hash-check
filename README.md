@@ -99,7 +99,8 @@ docker run -d \
 
 ### How to skip hash check
 
-In the web interface http://ip:9091/transmission/web/ or [Transmission Remote GUI](https://github.com/transmission-remote-gui/transgui). Right click on ANY torrent, click `Ask tracker for more peers` and the CURRENT verifying torrent will be skipped for hash check. (Taken from [here](https://github.com/superlukia/transmission-2.92_skiphashcheck#how-to-use))
+In the web interface http://ip:9091/transmission/web/ or [Transmission Remote GUI](https://github.com/transmission-remote-gui/transgui). Right click on ANY SEEDING torrent, choose `Ask tracker for more peers` (or tick ANY torrent and click the ![Ask tracker for more peers](https://user-images.githubusercontent.com/11386903/134805662-c52dfc85-1b80-40cf-8674-5780071a7c85.PNG) icon
+in the toolbar) and the CURRENT verifying torrent will be skipped for hash check. (Taken from [here](https://github.com/superlukia/transmission-2.92_skiphashcheck#how-to-use))
 
 ## Notes
 
