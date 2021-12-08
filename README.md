@@ -25,7 +25,9 @@ A Ubuntu based container images for [Transmission](https://www.transmissionbt.co
 
 ## Support Architectures
 
-`x86-64` ONLY
+`x86-64` only
+
+`linux/arm64/v8 (arm64)` and `linux/arm/v7` are provided on an as is basis.
 
 ## Usage
 
