@@ -1,4 +1,4 @@
-FROM ubuntu:focal as builder
+FROM ubuntu:focal AS builder
 
 # set version label
 ARG BUILD_DATE
@@ -73,7 +73,7 @@ RUN \
  rm -rf /transmission-build && \
  echo "**** finish ****"
 
-FROM lsiobase/ubuntu:focal
+FROM lsiobase/ubuntu:focal AS build
 
 RUN \
  echo "**** install packages ****" && \
