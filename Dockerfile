@@ -27,12 +27,10 @@ RUN \
 	zlib1g-dev && \
  mkdir /transmission-build && \
  cd /transmission-build && \
- 
  echo "**** download transmission ****" && \
  curl -O https://raw.githubusercontent.com/transmission/transmission-releases/master/transmission-3.00.tar.xz && \
  tar Jxf transmission-3.00.tar.xz && \
  cd transmission-3.00 && \
- 
  echo "**** download patch ****" && \
  mkdir patches && \
  curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/001-skip-hash-checking.patch \
@@ -41,23 +39,19 @@ RUN \
 	-o patches/002-fdlimit.patch && \
  curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/003-random-announce.patch \
 	-o patches/003-random-announce.patch && \
- 
  echo "**** apply patch ****" && \
  patch -N -p0 < patches/001-skip-hash-checking.patch && \
  patch -N -p0 < patches/002-fdlimit.patch && \
  patch -N -p0 < patches/003-random-announce.patch && \
- 
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \
- 
  echo "**** compile checks ****" && \
  ../autogen.sh --enable-daemon --disable-nls && \
  echo "**** compile start ****" && \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
  make install && \
-   
  echo "**** setup default web interface  + transmission-web-control ****" && \
  cp -rp /usr/local/share/transmission/web /web && \
  cd / && \
@@ -67,7 +61,6 @@ RUN \
  mv /transmission-web-control-master/src/ /transmission-web-control/ && \
  rm -rf /transmission-web-control-master/ && \
  cd / && \
-
  echo "**** cleanup ****" && \
  apt clean && \
  rm -rf /transmission-build && \
