@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+pid=$(pidof transmission-daemon)
+PORT=$(jq '.["rpc-port"]' /config/settings.json)
+
+if [[ -n "$USER" ]] && [[ -n "$PASS" ]]; then
+    /usr/bin/transmission-remote 127.0.0.1:${PORT:-9091} -n "$USER":"$PASS" --exit
+else
+    /usr/bin/transmission-remote 127.0.0.1:${PORT:-9091} --exit
+fi
+
+tail --pid=${pid} -f /dev/null

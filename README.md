@@ -3,7 +3,7 @@
 A Ubuntu based container images for [Transmission](https://www.transmissionbt.com/) with [customized features](https://github.com/TonyRL/docker-transmission-skip-hash-check/#customized-features).
 
 * Compatible with well-known [linuxserver/transmission](https://hub.docker.com/r/linuxserver/transmission)
-* Optional feature-rich Web UI [ronggang/transmission-web-control](https://github.com/ronggang/transmission-web-control)
+* Optional feature-rich Web UI [ronggang/transmission-web-control](https://github.com/ronggang/transmission-web-control), [johman10/flood-for-transmission](https://github.com/johman10/flood-for-transmission) and [openscopeproject/TrguiNG](https://github.com/openscopeproject/TrguiNG)
 * Weekly base OS updates from [upstream](https://github.com/linuxserver/docker-baseimage-ubuntu)
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/tonyrl/docker-transmission-skip-hash-check?style=for-the-badge)
@@ -20,22 +20,21 @@ A Ubuntu based container images for [Transmission](https://www.transmissionbt.co
 | Transmission Release   | Base OS       | Tag  | Size  |
 | :--------------------: |:-------------:| :---:| :----:|
 | 3.00  | Ubuntu 20.04 LTS | `focal`, `latest` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/focal?style=flat-square)
-| 3.00  | Ubuntu 18.04 LTS | `bionic-v3` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/bionic-v3?style=flat-square)
-| 2.94 | Ubuntu 18.04 LTS | `bionic-v2.94` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/bionic-v2.94?style=flat-square)
+| 3.00  | Ubuntu 26.04 LTS | `v3` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v3?style=flat-square)
+| 2.94 | Ubuntu 26.04 LTS | `v2.94` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v2.94?style=flat-square)
 
 ## Support Architectures
 
-`x86-64` only
+`linux/amd64` and `linux/arm64`
 
-`linux/arm64/v8 (arm64)` and `linux/arm/v7` are provided on an as is basis.
+`linux/arm/v7` is not supported.
 
 ## Usage
 
-### docker-composer
+### docker compose
 
 ```yaml
 ---
-version: "2.1"
 services:
   transmission:
     image: tonyrl/transmission-skip-hash-check
@@ -44,7 +43,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - TRANSMISSION_WEB_HOME=/transmission-web-control/ #optional
+      - TRANSMISSION_WEB_HOME=/transmission-web-control #optional, or /flood-for-transmission or /trguing
       - USER=username #optional
       - PASS=password #optional
       - WHITELIST=iplist #optional
@@ -67,7 +66,7 @@ docker run -d \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
-  -e TRANSMISSION_WEB_HOME=/transmission-web-control/ `#optional` \
+  -e TRANSMISSION_WEB_HOME=/transmission-web-control `#optional, or /flood-for-transmission or /trguing` \
   -e USER=username `#optional` \
   -e PASS=password `#optional` \
   -e WHITELIST=iplist `#optional` \
@@ -91,7 +90,7 @@ docker run -d \
 | `-e PUID=1000` | UserID |
 | `-e PGID=1000` | GroupID |
 | `-e TZ=Europe/London` | Specify a timezone. [Time Zones list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) |
-| `-e TRANSMISSION_WEB_HOME=/transmission-web-control/` | Use [transmission-web-control](https://github.com/ronggang/transmission-web-control). (**optional**) |
+| `-e TRANSMISSION_WEB_HOME=/transmission-web-control` | Use [transmission-web-control](https://github.com/ronggang/transmission-web-control). Set to `/flood-for-transmission` to use [Flood for Transmission](https://github.com/johman10/flood-for-transmission) or `/trguing` to use [TrguiNG](https://github.com/openscopeproject/TrguiNG). (**optional**) |
 | `-e USER=username` | Specify an **optional** username for the interface |
 | `-e PASS=password` | Specify an **optional** password for the interface |
 | `-e WHITELIST=iplist` | Specify an **optional** list of comma separated host whitelist |

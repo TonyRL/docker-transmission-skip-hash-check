@@ -13,6 +13,12 @@ diff --git a/libtransmission/announcer.c b/libtransmission/announcer.c
 index 193d716a1..96ca4534c 100644
 --- libtransmission/announcer.c
 +++ libtransmission/announcer.c
+@@ -9,4 +9,5 @@
+ #include <limits.h> /* INT_MAX */
++#include <math.h> /* round() */
+ #include <stdio.h>
+ #include <stdlib.h> /* qsort() */
+ #include <string.h> /* strcmp(), memcpy(), strncmp() */
 @@ -1244,9 +1244,11 @@
                 then a separate scrape isn't needed */
              if (scrape_fields >= 3 || (scrape_fields >= 1 && tracker->scrape_info == NULL))
