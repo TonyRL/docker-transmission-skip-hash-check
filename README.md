@@ -15,6 +15,8 @@ A Ubuntu based container images for [Transmission](https://www.transmissionbt.co
 * Lift 1024 open files limit (backport [transmission/transmission#893](https://github.com/transmission/transmission/pull/893))
 * Skew Scrape/Announce intervals (backport [transmission/transmission#936](https://github.com/transmission/transmission/pull/936))
 * OpenSSL 3 legacy provider support
+* Respect NAT-PMP private/public port and lifetime (backport [transmission/transmission#1602](https://github.com/transmission/transmission/pull/1602) and [transmission/transmission#2482](https://github.com/transmission/transmission/pull/2482))
+* Fetch metadata of stopped magnets (backport [transmission/transmission#1080](https://github.com/transmission/transmission/pull/1080))
 
 ## Support Version
 
