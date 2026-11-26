@@ -38,6 +38,8 @@ RUN \
  patch -N -p0 < patches/003-random-announce.patch && \
  patch -N -p0 < patches/004-openssl3-rc4.patch && \
  patch -N -p0 < patches/005-miniupnpc-api-18.patch && \
+ patch -N -p0 < patches/006-natpmp-lifetime.patch && \
+ patch -N -p0 < patches/007-stopped-magnet-metadata.patch && \
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \

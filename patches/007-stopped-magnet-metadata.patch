@@ -1,0 +1,61 @@
+From d3c55f2b0ef3883f350e8a84072ec0e2924814a8 Mon Sep 17 00:00:00 2001
+From: Guido Cella <guidocella91@gmail.com>
+Date: Sun, 15 Dec 2019 17:18:11 +0100
+Subject: [PATCH] Fetch metadata of stopped magnets
+
+---
+ libtransmission/torrent-magnet.c |    2 +-
+ libtransmission/torrent.c        |   13 +++++++++++--
+ libtransmission/torrent.h        |    1 +
+ 3 files changed, 13 insertions(+), 3 deletions(-)
+
+--- libtransmission/torrent-magnet.c
++++ libtransmission/torrent-magnet.c
+@@ -325,7 +325,7 @@
+           tor->incompleteMetadata = NULL;
+           tor->isStopping = true;
+           tor->magnetVerify = true;
+-          tor->startAfterVerify = true;
++          tor->startAfterVerify = !tor->prefetchMagnetMetadata;
+         }
+         else /* drat. */
+         {
+--- libtransmission/torrent.c
++++ libtransmission/torrent.c
+@@ -965,8 +965,16 @@
+ 
+   if (isNewTorrent)
+     {
+-      tor->startAfterVerify = doStart;
+-      tr_torrentVerify (tor, NULL, NULL);
++      if (!tr_torrentHasMetadata (tor) && !doStart)
++        {
++          tor->prefetchMagnetMetadata = true;
++          tr_torrentStartNow (tor);
++        }
++      else
++        {
++          tor->startAfterVerify = doStart;
++          tr_torrentVerify (tor, NULL, NULL);
++        }
+     }
+   else if (doStart)
+     {
+@@ -1893,6 +1901,7 @@
+ 
+       tor->isRunning = false;
+       tor->isStopping = false;
++      tor->prefetchMagnetMetadata = false;
+       tr_torrentSetDirty (tor);
+       tr_runInEventThread (tor->session, stopTorrent, tor);
+ 
+--- libtransmission/torrent.h
++++ libtransmission/torrent.h
+@@ -247,6 +247,7 @@
+     bool                       isDirty;
+     bool                       isQueued;
+ 
++    bool                       prefetchMagnetMetadata;
+     bool                       magnetVerify;
+ 
+     bool                       infoDictOffsetIsCached;
