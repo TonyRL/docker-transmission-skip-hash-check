@@ -1,0 +1,26 @@
+--- libtransmission/crypto-utils-openssl.c
++++ libtransmission/crypto-utils-openssl.c
+@@ -17,6 +17,7 @@
+ #include <openssl/err.h>
+ #include <openssl/evp.h>
+ #include <openssl/opensslv.h>
++#include <openssl/provider.h>
+ #include <openssl/rand.h>
+ #include <openssl/ssl.h>
+ #include <openssl/x509.h>
+@@ -184,6 +185,15 @@
+ 
+ tr_rc4_ctx_t tr_rc4_new(void)
+ {
++    static bool providers_loaded = false;
++
++    if (!providers_loaded)
++    {
++        OSSL_PROVIDER_load(NULL, "legacy");
++        OSSL_PROVIDER_load(NULL, "default");
++        providers_loaded = true;
++    }
++
+     EVP_CIPHER_CTX* handle = EVP_CIPHER_CTX_new();
+ 
+     if (check_result(EVP_CipherInit_ex(handle, EVP_rc4(), NULL, NULL, NULL, -1)))

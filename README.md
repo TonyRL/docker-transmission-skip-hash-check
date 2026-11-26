@@ -7,21 +7,22 @@ A Ubuntu based container images for [Transmission](https://www.transmissionbt.co
 * Weekly base OS updates from [upstream](https://github.com/linuxserver/docker-baseimage-ubuntu)
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/tonyrl/docker-transmission-skip-hash-check?style=for-the-badge)
-[![Docker Pulls](https://img.shields.io/docker/pulls/tonyrl/transmission-skip-hash-check?style=for-the-badge)]((https://hub.docker.com/r/tonyrl/transmission-skip-hash-check/))
+[![Docker Pulls](https://img.shields.io/docker/pulls/tonyrl/transmission-skip-hash-check?style=for-the-badge)](https://hub.docker.com/r/tonyrl/transmission-skip-hash-check)
 
 ## Customized Features
 
 * Skip hash check ([details](https://github.com/TonyRL/docker-transmission-skip-hash-check#how-to-skip-hash-check))
 * Lift 1024 open files limit (backport [transmission/transmission#893](https://github.com/transmission/transmission/pull/893))
 * Skew Scrape/Announce intervals (backport [transmission/transmission#936](https://github.com/transmission/transmission/pull/936))
+* OpenSSL 3 legacy provider support
 
 ## Support Version
 
 | Transmission Release   | Base OS       | Tag  | Size  |
 | :--------------------: |:-------------:| :---:| :----:|
-| 3.00  | Ubuntu 20.04 LTS | `focal`, `latest` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/focal?style=flat-square)
-| 3.00  | Ubuntu 26.04 LTS | `v3` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v3?style=flat-square)
-| 2.94 | Ubuntu 26.04 LTS | `v2.94` | ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v2.94?style=flat-square)
+| 4.x (latest release) | Ubuntu 26.04 LTS | `latest` | [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/latest?style=flat-square)](https://hub.docker.com/r/tonyrl/transmission-skip-hash-check/tags?name=latest)
+| 3.00  | Ubuntu 26.04 LTS | `v3` | [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v3?style=flat-square)](https://hub.docker.com/r/tonyrl/transmission-skip-hash-check/tags?name=v3)
+| 2.94 | Ubuntu 26.04 LTS | `v2.94` | [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tonyrl/transmission-skip-hash-check/v2.94?style=flat-square)](https://hub.docker.com/r/tonyrl/transmission-skip-hash-check/tags?name=v2.94)
 
 ## Support Architectures
 
