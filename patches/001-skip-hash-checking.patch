@@ -1,85 +1,95 @@
---- libtransmission/rpcimpl.c	2020-05-22 19:04:23.391804861 +0800
-+++ libtransmission/rpcimpl.c	2020-05-22 19:04:23.391804861 +0800
-@@ -32,6 +32,7 @@
- #include "tr-macros.h"
- #include "utils.h"
- #include "variant.h"
-+#include "verify.h"
- #include "version.h"
- #include "web.h"
- 
-@@ -363,6 +364,8 @@
-     struct tr_rpc_idle_data* idle_data UNUSED)
+--- libtransmission/rpcimpl.cc
++++ libtransmission/rpcimpl.cc
+@@ -44,6 +44,7 @@
+ #include "libtransmission/utils.h"
+ #include "libtransmission/values.h"
+ #include "libtransmission/variant.h"
++#include "libtransmission/verify.h"
+ #include "libtransmission/version.h"
+ #include "libtransmission/web-utils.h"
+ #include "libtransmission/web.h"
+@@ -422,6 +423,8 @@
+     tr_variant::Map const& args_in,
+     tr_variant::Map& /*args_out*/)
  {
-     TR_ASSERT(idle_data == NULL);
-+	
-+	tr_skipHash ();
- 
-     int torrentCount;
-     tr_torrent** torrents = getTorrents(session, args_in, &torrentCount);
---- libtransmission/verify.h	2020-05-22 19:04:23.394804884 +0800
-+++ libtransmission/verify.h	2020-05-22 19:04:23.394804884 +0800
-@@ -17,6 +17,8 @@
-  * @{
-  */
- 
-+void tr_skipHash(void);
++    tr_skip_hash_check();
 +
- void tr_verifyAdd(tr_torrent* tor, tr_verify_done_func callback_func, void* callback_user_data);
+     for (auto* tor : getTorrents(session, args_in))
+     {
+         if (tr_torrentCanManualUpdate(tor))
+--- libtransmission/verify.h
++++ libtransmission/verify.h
+@@ -24,6 +24,8 @@
+ #include "libtransmission/torrent-metainfo.h"
+ #include "libtransmission/tr-macros.h"
  
- void tr_verifyRemove(tr_torrent* tor);
---- libtransmission/verify.c	2020-05-22 19:04:23.394804884 +0800
-+++ libtransmission/verify.c	2020-05-22 19:04:23.394804884 +0800
-@@ -30,6 +30,12 @@
-     MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY = 100
- };
++void tr_skip_hash_check();
++
+ class tr_verify_worker
+ {
+ public:
+--- libtransmission/verify.cc
++++ libtransmission/verify.cc
+@@ -18,6 +18,7 @@
  
-+static bool skipHashCheck = false;
-+void tr_skipHash(void)
+ #include "libtransmission/crypto-utils.h"
+ #include "libtransmission/file.h"
++#include "libtransmission/log.h"
+ #include "libtransmission/tr-macros.h"
+ #include "libtransmission/verify.h"
+ 
+@@ -29,8 +30,15 @@
+ {
+     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::steady_clock::now());
+ }
++
++std::atomic<bool> skip_hash_check = false;
+ } // namespace
+ 
++void tr_skip_hash_check()
 +{
-+    skipHashCheck = true;
++    skip_hash_check = true;
 +}
 +
- static bool verifyTorrent(tr_torrent* tor, bool* stopFlag)
- {
-     time_t end;
-@@ -66,7 +72,7 @@
-         }
+ void tr_verify_worker::verify_torrent(
+     Mediator& verify_mediator,
+     std::atomic<bool> const& abort_flag,
+@@ -54,7 +62,7 @@
+         auto const file_length = metainfo.file_size(file_index);
  
          /* if we're starting a new file... */
--        if (filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
-+        if (!skipHashCheck && filePos == 0 && fd == TR_BAD_SYS_FILE && fileIndex != prevFileIndex)
+-        if (file_pos == 0U && fd == TR_BAD_SYS_FILE && file_index != prev_file_index)
++        if (!skip_hash_check && file_pos == 0U && fd == TR_BAD_SYS_FILE && file_index != prev_file_index)
          {
-             char* filename = tr_torrentFindFile(tor, fileIndex);
-             fd = filename == NULL ? TR_BAD_SYS_FILE : tr_sys_file_open(filename, TR_SYS_FILE_READ | TR_SYS_FILE_SEQUENTIAL, 0,
-@@ -86,7 +92,7 @@
+             auto const found = verify_mediator.find_file(file_index);
+             fd = !found ? TR_BAD_SYS_FILE : tr_sys_file_open(found->c_str(), TR_SYS_FILE_READ | TR_SYS_FILE_SEQUENTIAL, 0);
+@@ -68,7 +76,7 @@
+         bytes_this_pass = std::min(bytes_this_pass, uint64_t(std::size(buffer)));
+ 
+         /* read a bit */
+-        if (fd != TR_BAD_SYS_FILE)
++        if (!skip_hash_check && fd != TR_BAD_SYS_FILE)
          {
-             uint64_t numRead;
+             auto num_read = uint64_t{};
+             if (tr_sys_file_read_at(fd, std::data(buffer), bytes_this_pass, file_pos, &num_read) && num_read > 0U)
+@@ -87,7 +95,7 @@
+         /* if we're finishing a piece... */
+         if (left_in_piece == 0U)
+         {
+-            auto const has_piece = sha.finish() == metainfo.piece_hash(piece);
++            auto const has_piece = skip_hash_check || sha.finish() == metainfo.piece_hash(piece);
+             verify_mediator.on_piece_checked(piece, has_piece);
  
--            if (tr_sys_file_read_at(fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
-+            if (!skipHashCheck && tr_sys_file_read_at(fd, buffer, bytesThisPass, filePos, &numRead, NULL) && numRead > 0)
-             {
-                 bytesThisPass = numRead;
-                 tr_sha1_update(sha, buffer, bytesThisPass);
-@@ -108,7 +114,7 @@
-             uint8_t hash[SHA_DIGEST_LENGTH];
- 
-             tr_sha1_final(sha, hash);
--            hasPiece = memcmp(hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH) == 0;
-+            hasPiece = skipHashCheck || memcmp(hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH) == 0;
- 
-             if (hasPiece || hadPiece)
-             {
-@@ -146,6 +152,12 @@
-             filePos = 0;
+             if (sleep_per_seconds_during_verify > std::chrono::milliseconds::zero())
+@@ -120,6 +128,11 @@
          }
      }
-+	
-+	if (skipHashCheck)
-+	{
-+		skipHashCheck = false;
-+		tr_logAddTorInfo (tor, "%s", _("Skipped hash check"));
-+	}
  
++    if (skip_hash_check.exchange(false))
++    {
++        tr_logAddInfo("Skipped hash check");
++    }
++
      /* cleanup */
      if (fd != TR_BAD_SYS_FILE)
+     {

@@ -1,4 +1,4 @@
-FROM ubuntu:focal AS builder
+FROM ubuntu:resolute AS builder
 
 # set version label
 ARG BUILD_DATE
@@ -8,6 +8,7 @@ LABEL build_version="transmission-skip-hash version:- ${VERSION} Build-date:- ${
 LABEL maintainer="TonyRL"
 
 COPY root/ /s6-config
+COPY patches/ /transmission-build/patches/
 # install packages
 RUN \
  echo "**** install packages ****" && \
@@ -15,67 +16,66 @@ RUN \
  apt install -qqy \
 	apt-utils \
 	build-essential \
+	cmake \
 	curl \
-	intltool  \
 	libcurl4-openssl-dev \
+	libdeflate-dev \
 	libevent-dev \
 	libminiupnpc-dev \
+	libnatpmp-dev \
 	libssl-dev \
-	libtool \
 	pkg-config \
 	unzip \
 	zlib1g-dev && \
- mkdir /transmission-build && \
  cd /transmission-build && \
  echo "**** download transmission ****" && \
- curl -O https://raw.githubusercontent.com/transmission/transmission-releases/master/transmission-3.00.tar.xz && \
- tar Jxf transmission-3.00.tar.xz && \
- cd transmission-3.00 && \
- echo "**** download patch ****" && \
- mkdir patches && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/001-skip-hash-checking.patch \
-	-o patches/001-skip-hash-checking.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/002-fdlimit.patch \
-	-o patches/002-fdlimit.patch && \
- curl https://raw.githubusercontent.com/TonyRL/docker-transmission-skip-hash-check/focal/patches/003-random-announce.patch \
-	-o patches/003-random-announce.patch && \
+ TRANSMISSION_VERSION=$(basename $(curl -Ls -o /dev/null -w '%{url_effective}' https://github.com/transmission/transmission/releases/latest)) && \
+ curl -LO https://github.com/transmission/transmission/releases/download/${TRANSMISSION_VERSION}/transmission-${TRANSMISSION_VERSION}.tar.xz && \
+ tar Jxf transmission-${TRANSMISSION_VERSION}.tar.xz && \
+ cd transmission-${TRANSMISSION_VERSION} && \
  echo "**** apply patch ****" && \
- patch -N -p0 < patches/001-skip-hash-checking.patch && \
- patch -N -p0 < patches/002-fdlimit.patch && \
- patch -N -p0 < patches/003-random-announce.patch && \
- echo "**** setup artifact folder ****" && \
- mkdir build && \
- cd build && \
+# patch -N -p0 < ../patches/001-skip-hash-checking.patch && \
+ patch -N -p0 < ../patches/003-random-announce.patch && \
  echo "**** compile checks ****" && \
- ../autogen.sh --enable-daemon --disable-nls && \
+ cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_GTK=OFF -DENABLE_QT=OFF -DENABLE_TESTS=OFF -DENABLE_NLS=OFF -DINSTALL_DOC=OFF && \
  echo "**** compile start ****" && \
- make -j$(nproc) && \
+ cmake --build build -j$(nproc) && \
  echo "**** compile finish ****" && \
- make install && \
+ cmake --install build && \
  echo "**** setup default web interface  + transmission-web-control ****" && \
- cp -rp /usr/local/share/transmission/web /web && \
+ cp -rp /usr/local/share/transmission/public_html /web && \
  cd / && \
  curl -O https://codeload.github.com/ronggang/transmission-web-control/zip/master && \
  unzip -q master && \
  rm master && \
  mv /transmission-web-control-master/src/ /transmission-web-control/ && \
  rm -rf /transmission-web-control-master/ && \
+ echo "**** setup flood-for-transmission ****" && \
+ curl -LO https://github.com/johman10/flood-for-transmission/releases/latest/download/flood-for-transmission.zip && \
+ unzip -q flood-for-transmission.zip && \
+ rm flood-for-transmission.zip && \
+ echo "**** setup TrguiNG ****" && \
+ TRGUING_VERSION=$(basename $(curl -Ls -o /dev/null -w '%{url_effective}' https://github.com/openscopeproject/TrguiNG/releases/latest)) && \
+ curl -LO https://github.com/openscopeproject/TrguiNG/releases/download/${TRGUING_VERSION}/trguing-web-${TRGUING_VERSION}.zip && \
+ unzip -q trguing-web-${TRGUING_VERSION}.zip -d /trguing && \
+ rm trguing-web-${TRGUING_VERSION}.zip && \
  cd / && \
  echo "**** cleanup ****" && \
  apt clean && \
  rm -rf /transmission-build && \
  echo "**** finish ****"
 
-FROM lsiobase/ubuntu:focal AS build
+FROM ghcr.io/linuxserver/baseimage-ubuntu:resolute AS build
 
 RUN \
  echo "**** install packages ****" && \
  apt update && \
  apt install -qqy \
-	libcurl4 \
-	libevent-2.1-7 \
-	libminiupnpc17 \
-	libnatpmp1 && \
+	libcurl4t64 \
+	libdeflate0 \
+	libevent-2.1-7t64 \
+	libminiupnpc21 \
+	libnatpmp1t64 && \
  echo "**** cleanup ****" && \
  apt clean
 
@@ -83,16 +83,18 @@ RUN \
 COPY --from=builder /usr/local/bin/ /usr/bin/
 COPY --from=builder /web  /web
 COPY --from=builder /transmission-web-control  /transmission-web-control
+COPY --from=builder /flood-for-transmission  /flood-for-transmission
+COPY --from=builder /trguing  /trguing
 COPY --from=builder /s6-config /
 
 RUN \
  echo "**** setup web interface ****" && \
  mkdir /usr/local/share/transmission && \
- ln -s /web/ /usr/local/share/transmission/web && \
+ ln -s /web/ /usr/local/share/transmission/public_html && \
  ln -s /web/index.html /transmission-web-control/index.original.html && \
  ln -s /web/images/ /transmission-web-control/images && \
- ln -s /web/javascript/ /transmission-web-control/javascript && \
- ln -s /web/style/ /transmission-web-control/style
+ ln -s /web/transmission-app.css /transmission-web-control/transmission-app.css && \
+ ln -s /web/transmission-app.js /transmission-web-control/transmission-app.js
 
 # ports and volumes
 EXPOSE 9091 51413 51413/udp
