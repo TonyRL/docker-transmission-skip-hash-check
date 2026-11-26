@@ -34,6 +34,7 @@ RUN \
  patch -N -p0 < patches/001-skip-hash-checking.patch && \
  patch -N -p0 < patches/002-fdlimit.patch && \
  patch -N -p0 < patches/003-random-announce.patch && \
+ patch -N -p0 < patches/004-openssl3-rc4.patch && \
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \
