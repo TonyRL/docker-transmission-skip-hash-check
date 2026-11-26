@@ -20,6 +20,8 @@ RUN \
 	intltool  \
 	libcurl4-openssl-dev \
 	libevent-dev \
+	libminiupnpc-dev \
+	libnatpmp-dev \
 	libssl-dev \
 	libtool \
 	pkg-config \
@@ -35,11 +37,12 @@ RUN \
  patch -N -p0 < patches/002-fdlimit.patch && \
  patch -N -p0 < patches/003-random-announce.patch && \
  patch -N -p0 < patches/004-openssl3-rc4.patch && \
+ patch -N -p0 < patches/005-miniupnpc-api-18.patch && \
  echo "**** setup artifact folder ****" && \
  mkdir build && \
  cd build && \
  echo "**** compile checks ****" && \
- INTLTOOLIZE=true ../autogen.sh --enable-daemon --disable-nls && \
+ INTLTOOLIZE=true ../autogen.sh --enable-daemon --enable-external-natpmp --disable-nls && \
  echo "**** compile start ****" && \
  make -j$(nproc) && \
  echo "**** compile finish ****" && \
@@ -74,7 +77,9 @@ RUN \
  apt update && \
  apt install -qqy \
 	libcurl4t64 \
-	libevent-2.1-7t64 && \
+	libevent-2.1-7t64 \
+	libminiupnpc21 \
+	libnatpmp1t64 && \
  echo "**** cleanup ****" && \
  apt clean
 
