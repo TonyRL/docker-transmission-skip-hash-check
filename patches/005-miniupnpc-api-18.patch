@@ -1,0 +1,24 @@
+--- libtransmission/upnp.c
++++ libtransmission/upnp.c
+@@ -7,6 +7,7 @@
+  */
+ 
+ #include <errno.h>
++#include <stddef.h>
+ 
+ #ifdef SYSTEM_MINIUPNP
+ #include <miniupnpc/miniupnpc.h>
+@@ -194,8 +195,13 @@
+ 
+         errno = 0;
+ 
++#if (MINIUPNPC_API_VERSION >= 18)
++        if (UPNP_GetValidIGD(devlist, &handle->urls, &handle->data, handle->lanaddr,
++            sizeof(handle->lanaddr), NULL, 0) == UPNP_IGD_VALID_CONNECTED)
++#else
+         if (UPNP_GetValidIGD(devlist, &handle->urls, &handle->data, handle->lanaddr,
+             sizeof(handle->lanaddr)) == UPNP_IGD_VALID_CONNECTED)
++#endif
+         {
+             tr_logAddNamedInfo(getKey(), _("Found Internet Gateway Device \"%s\""), handle->urls.controlURL);
+             tr_logAddNamedInfo(getKey(), _("Local Address is \"%s\""), handle->lanaddr);
