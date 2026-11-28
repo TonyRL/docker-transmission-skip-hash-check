@@ -7,6 +7,11 @@ name: Publish to Docker registry
 
 on:
   workflow_dispatch:
+    inputs:
+      no-cache:
+        description: Build without cache
+        type: boolean
+        default: false
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -66,6 +71,7 @@ jobs:
           context: .
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
+          no-cache: ${{ inputs.no-cache }}
           cache-from: type=gha, scope=${{ github.workflow }}-${{ runner.arch }}
           cache-to: type=gha, mode=max, scope=${{ github.workflow }}-${{ runner.arch }}
           outputs: type=image,name=${{ env.GHCR_IMAGE }},compression=zstd,force-compression=true,push-by-digest=true,name-canonical=true,push=true
