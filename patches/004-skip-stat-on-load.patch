@@ -1,0 +1,46 @@
+--- libtransmission/torrent.cc
++++ libtransmission/torrent.cc
+@@ -2593,10 +2593,41 @@
+     auto const n_files = tor_.file_count();
+     tor_.file_mtimes_.resize(n_files);
+ 
++    auto trust_saved = false;
++    auto missing_dir = std::string_view{};
+     for (size_t file = 0; file < n_files; ++file)
+     {
+-        auto const found = tor_.find_file(file);
+-        auto const mtime = found ? found->last_modified_at : 0;
++        if (mtimes[file] != 0)
++        {
++            auto const found = tor_.find_file(file);
++            trust_saved = found && found->last_modified_at == mtimes[file];
++
++            auto const subpath = std::string_view{ tor_.file_subpath(file) };
++            if (auto const pos = subpath.find('/'); !found && pos != std::string_view::npos)
++            {
++                auto const dir_exists = [top = subpath.substr(0, pos)](auto const& base)
++                {
++                    return !std::empty(base) && tr_sys_path_exists(tr_pathbuf{ base.sv(), '/', top });
++                };
++
++                if (!dir_exists(tor_.download_dir()) && !dir_exists(tor_.incomplete_dir()))
++                {
++                    missing_dir = subpath.substr(0, pos + 1);
++                }
++            }
++
++            break;
++        }
++    }
++
++    for (size_t file = 0; file < n_files; ++file)
++    {
++        auto mtime = trust_saved ? mtimes[file] : 0;
++        if (mtime == 0 && (std::empty(missing_dir) || !tr_strv_starts_with(tor_.file_subpath(file), missing_dir)))
++        {
++            auto const found = tor_.find_file(file);
++            mtime = found ? found->last_modified_at : 0;
++        }
+ 
+         tor_.file_mtimes_[file] = mtime;
+ 

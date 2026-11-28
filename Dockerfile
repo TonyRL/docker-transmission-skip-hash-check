@@ -36,6 +36,7 @@ RUN \
  echo "**** apply patch ****" && \
 # patch -N -p0 < ../patches/001-skip-hash-checking.patch && \
  patch -N -p0 < ../patches/003-random-announce.patch && \
+ patch -N -p0 < ../patches/004-skip-stat-on-load.patch && \
  echo "**** compile checks ****" && \
  cmake -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_GTK=OFF -DENABLE_QT=OFF -DENABLE_TESTS=OFF -DENABLE_NLS=OFF -DINSTALL_DOC=OFF && \
  echo "**** compile start ****" && \
@@ -45,15 +46,19 @@ RUN \
  echo "**** setup default web interface  + transmission-web-control ****" && \
  cp -rp /usr/local/share/transmission/public_html /web && \
  cd / && \
- curl -O https://codeload.github.com/ronggang/transmission-web-control/zip/master && \
- unzip -q master && \
- rm master && \
- mv /transmission-web-control-master/src/ /transmission-web-control/ && \
- rm -rf /transmission-web-control-master/ && \
+ curl -LO https://nightly.link/TonyRL/transmission-web-control/workflows/ci.yaml/master/dist.zip && \
+ unzip -q dist.zip && \
+ rm dist.zip && \
+ mv /dist/ /transmission-web-control/ && \
  echo "**** setup flood-for-transmission ****" && \
  curl -LO https://github.com/johman10/flood-for-transmission/releases/latest/download/flood-for-transmission.zip && \
  unzip -q flood-for-transmission.zip && \
  rm flood-for-transmission.zip && \
+ echo "**** setup Shift ****" && \
+ curl -O https://codeload.github.com/killemov/Shift/zip/master && \
+ unzip -q master && \
+ rm master && \
+ mv /Shift-master/ /shift/ && \
  echo "**** setup TrguiNG ****" && \
  TRGUING_VERSION=$(basename $(curl -Ls -o /dev/null -w '%{url_effective}' https://github.com/openscopeproject/TrguiNG/releases/latest)) && \
  curl -LO https://github.com/openscopeproject/TrguiNG/releases/download/${TRGUING_VERSION}/trguing-web-${TRGUING_VERSION}.zip && \
@@ -84,6 +89,7 @@ COPY --from=builder /usr/local/bin/ /usr/bin/
 COPY --from=builder /web  /web
 COPY --from=builder /transmission-web-control  /transmission-web-control
 COPY --from=builder /flood-for-transmission  /flood-for-transmission
+COPY --from=builder /shift  /shift
 COPY --from=builder /trguing  /trguing
 COPY --from=builder /s6-config /
 

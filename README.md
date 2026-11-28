@@ -3,7 +3,7 @@
 A Ubuntu based container images for [Transmission](https://www.transmissionbt.com/) with [customized features](https://github.com/TonyRL/docker-transmission-skip-hash-check/#customized-features).
 
 * Compatible with well-known [linuxserver/transmission](https://hub.docker.com/r/linuxserver/transmission)
-* Optional feature-rich Web UI [ronggang/transmission-web-control](https://github.com/ronggang/transmission-web-control), [johman10/flood-for-transmission](https://github.com/johman10/flood-for-transmission) and [openscopeproject/TrguiNG](https://github.com/openscopeproject/TrguiNG)
+* Optional feature-rich Web UI [TonyRL/transmission-web-control](https://github.com/TonyRL/transmission-web-control), [johman10/flood-for-transmission](https://github.com/johman10/flood-for-transmission), [killemov/Shift](https://github.com/killemov/Shift) and [openscopeproject/TrguiNG](https://github.com/openscopeproject/TrguiNG)
 * Weekly base OS updates from [upstream](https://github.com/linuxserver/docker-baseimage-ubuntu)
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/tonyrl/docker-transmission-skip-hash-check?style=for-the-badge)
@@ -14,6 +14,7 @@ A Ubuntu based container images for [Transmission](https://www.transmissionbt.co
 * Skip hash check ([details](https://github.com/TonyRL/docker-transmission-skip-hash-check#how-to-skip-hash-check))
 * Lift 1024 open files limit (backport [transmission/transmission#893](https://github.com/transmission/transmission/pull/893)) (`v2.94`, `v3` only)
 * Skew Scrape/Announce intervals (backport [transmission/transmission#936](https://github.com/transmission/transmission/pull/936))
+* Faster startup checking. (`v4` only).
 * OpenSSL 3 legacy provider support (`v2.94`, `v3` only)
 * Respect NAT-PMP private/public port and lifetime (backport [transmission/transmission#1602](https://github.com/transmission/transmission/pull/1602) and [transmission/transmission#2482](https://github.com/transmission/transmission/pull/2482)) (`v2.94`, `v3` only)
 * Fetch metadata of stopped magnets (backport [transmission/transmission#1080](https://github.com/transmission/transmission/pull/1080)) (`v2.94`, `v3` only)
@@ -46,7 +47,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - TRANSMISSION_WEB_HOME=/transmission-web-control #optional, or /flood-for-transmission or /trguing
+      - TRANSMISSION_WEB_HOME=/transmission-web-control #optional, or /flood-for-transmission, /shift or /trguing
       - USER=username #optional
       - PASS=password #optional
       - WHITELIST=iplist #optional
@@ -69,7 +70,7 @@ docker run -d \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
-  -e TRANSMISSION_WEB_HOME=/transmission-web-control `#optional, or /flood-for-transmission or /trguing` \
+  -e TRANSMISSION_WEB_HOME=/transmission-web-control `#optional, or /flood-for-transmission, /shift or /trguing` \
   -e USER=username `#optional` \
   -e PASS=password `#optional` \
   -e WHITELIST=iplist `#optional` \
@@ -93,7 +94,7 @@ docker run -d \
 | `-e PUID=1000` | UserID |
 | `-e PGID=1000` | GroupID |
 | `-e TZ=Europe/London` | Specify a timezone. [Time Zones list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) |
-| `-e TRANSMISSION_WEB_HOME=/transmission-web-control` | Use [transmission-web-control](https://github.com/ronggang/transmission-web-control). Set to `/flood-for-transmission` to use [Flood for Transmission](https://github.com/johman10/flood-for-transmission) or `/trguing` to use [TrguiNG](https://github.com/openscopeproject/TrguiNG). (**optional**) |
+| `-e TRANSMISSION_WEB_HOME=/transmission-web-control` | Use [transmission-web-control](https://github.com/TonyRL/transmission-web-control). Set to `/flood-for-transmission` to use [Flood for Transmission](https://github.com/johman10/flood-for-transmission), `/shift` to use [Shift](https://github.com/killemov/Shift) or `/trguing` to use [TrguiNG](https://github.com/openscopeproject/TrguiNG). (**optional**) |
 | `-e USER=username` | Specify an **optional** username for the interface |
 | `-e PASS=password` | Specify an **optional** password for the interface |
 | `-e WHITELIST=iplist` | Specify an **optional** list of comma separated host whitelist |
@@ -108,7 +109,7 @@ in the toolbar) and the CURRENT verifying torrent will be skipped for hash check
 
 ## Notes
 
-Alternative Web UI such as [endor/kettu](https://github.com/endor/kettu) and [Secretmapper/combustion](https://github.com/Secretmapper/combustion) are dropped. If you want them back or want me to include other Web UI like [killemov/Shift](https://github.com/killemov/Shift), please raise an issue.
+Alternative Web UI such as [endor/kettu](https://github.com/endor/kettu) and [Secretmapper/combustion](https://github.com/Secretmapper/combustion) are dropped. If you want them back or want me to include other Web UI, please raise an issue.
 
 Since this image is LinuxServer based, [Docker Mods](https://github.com/linuxserver/docker-mods) from [LinuxServer.io](https://github.com/linuxserver/docker-mods) are also available.
 
